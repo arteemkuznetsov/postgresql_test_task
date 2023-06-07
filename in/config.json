@@ -1,0 +1,112 @@
+[
+	{
+		"location": "Moscow",
+		"source": "North",
+		"dates": ["2000-10-01", "2000-10-04", "2000-10-05"]
+	},
+	{
+		"location": "Abu Dhabi",
+		"source": "South",
+		"dates": ["2012-05-01", "2007-11-09", "2000-10-05"]
+	},
+	{
+		"location": "London",
+		"source": "North",
+		"dates": ["1990-06-19", "2002-10-17", "1997-04-17"]
+	},
+	{
+		"location": "Warsaw",
+		"source": "North",
+		"dates": ["1999-07-11", "1972-09-19", "2004-04-19"]
+	},
+	{
+		"location": "Warsaw",
+		"source": "North",
+		"dates": ["1999-07-11", "1972-09-19", "2004-04-19"]
+	},
+	{
+		"location": "Warsaw",
+		"source": "North",
+		"dates": ["1999-07-11", "1972-09-19", "2004-04-19"]
+	},
+	{
+		"location": "Lusaka",
+		"source": "South",
+		"dates": ["1985-10-11", "1983-07-24", "2018-09-30"]
+	},
+	{
+		"location": "Tokyo",
+		"source": "East",
+		"dates": ["2000-10-01", "2000-10-04", "1980-10-28"]
+	},
+	{
+		"location": "Washington",
+		"source": "West",
+		"dates": ["1976-04-09", "2009-02-16", "2007-05-15"]
+	},
+	{
+		"location": "Kyiv",
+		"source": "North",
+		"dates": ["1985-04-29", "2000-06-30", "1988-10-16"]
+	},
+	{
+		"location": "Damascus",
+		"source": "South",
+		"dates": ["1986-03-08", "1987-03-20", "2013-01-20"]
+	},
+	{
+		"location": "Bangkok",
+		"source": "East",
+		"dates": ["1993-09-13", "2000-10-01", "1980-10-21"]
+	},
+	{
+		"location": "Bangkok",
+		"source": "East",
+		"dates": ["1993-09-12", "2000-10-02", "1980-10-22"]
+	},
+	{
+		"location": "Bangkok",
+		"source": "East",
+		"dates": ["1993-09-13", "2000-10-03", "1980-10-23"]
+	},
+	{
+		"location": "Kingston",
+		"source": "West",
+		"dates": ["2000-10-01", "2000-10-04", "2000-10-05"]
+	},
+	{
+		"location": "Havana",
+		"source": "West",
+		"dates": ["1999-07-11", "1972-09-19", "2004-04-19"]
+	},
+	{
+		"location": "Beijing",
+		"source": "East",
+		"dates": ["1985-04-29", "2000-06-30", "1988-10-16"]
+	},
+	{
+		"location": "Kingston",
+		"source": "West",
+		"dates": ["1976-04-09", "2009-02-16", "2007-05-15"]
+	},
+	{
+		"location": "Kingston",
+		"source": "West",
+		"dates": ["1976-04-09", "2009-02-16", "2007-05-15"]
+	},
+	{
+		"location": "Kingston",
+		"source": "West",
+		"dates": ["1976-04-09", "2009-02-16", "2007-05-15"]
+	},
+	{
+		"location": "Kingston",
+		"source": "West",
+		"dates": ["1976-04-09", "2009-02-16", "2007-05-15"]
+	},
+	{
+		"location": "Kingston",
+		"source": "West",
+		"dates": ["1976-04-09", "2009-02-16", "2007-05-15"]
+	}
+]
