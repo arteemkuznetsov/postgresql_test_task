@@ -1,15 +1,20 @@
 import os
 import csv
-import psycopg2
-import psycopg2.extras
-import db_conf
+import sqlalchemy as sqla
+import sqlalchemy.orm
+from models import Csv
+
+DATABASE_URI = f'postgresql+psycopg2://{USERNAME}:{PASSWORD}@{HOST}:{PORT}/{DATABASE}'
 
 
 def main():
     """Точка входа"""
+    engine = sqla.create_engine(DATABASE_URI)
+    Session = sqla.orm.sessionmaker(bind=engine)
+
     csv_paths = search_csv_files()
-    write_csv_to_table(csv_paths)
-    update_counts_in_table()
+    write_csv_to_table(engine, Session, csv_paths)
+    update_counts_in_table(Session)
 
 
 def search_csv_files() -> list:
@@ -41,61 +46,45 @@ def read_csv(path) -> list | None:
         return None
 
 
-def connect() -> psycopg2.connection | None:
-    """Подключается к базе данных PostgreSQL"""
-    try:
-        return psycopg2.connect(
-            dbname=db_conf.DATABASE,
-            user=db_conf.USERNAME,
-            password=db_conf.PASSWORD,
-            host=db_conf.HOST
-        )
-    except psycopg2.OperationalError:
-        return None
+def create_table(engine):
+    """Создает таблицу в базе данных, если ее нет"""
+    inspect = sqla.inspect(engine)
+    if not inspect.has_table('csv', schema="public"):
+        Csv.Base.metadata.create_all(engine)
 
 
-def select(conn, sql) -> list:
-    """Делает SQL-запрос, возвращающий таблицу значений"""
-    with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as curs:
-        curs.execute(sql)
-        data = curs.fetchall()
-    return data
-
-
-def query(conn, sql, data=None):
-    """Делает SQL-запрос, который ничего не возвращает"""
-    with conn.cursor() as curs:
-        curs.execute(sql, data)
-        conn.commit()
-
-
-def write_csv_to_table(paths):
-    """Создает в базе данных таблицу, поочередно читает csv-файлы, формирует запрос и выполняет запись в таблицу"""
-    conn = connect()
-    query(conn, 'CREATE TABLE IF NOT EXISTS csv (category VARCHAR(8), count INT)')
-
+def write_csv_to_table(engine, Session, paths):
+    """Создает в базе данных таблицу, поочередно построчно читает csv-файлы и выполняет запись в таблицу"""
+    create_table(engine)
+    session = Session()
     for path in paths:
         rows = read_csv(path)
-        data = ()
-        sql = 'INSERT INTO csv (category, count) VALUES '
-        for index, row in enumerate(rows):
-            sql += '(%s, %s),' if index != len(rows) - 1 else '(%s, %s)'
-            data = data + (row['category'], row['count'],)
-        query(conn, sql, data)
+        mappings = []
+        for row in rows:
+            mappings.append(
+                Csv.Csv(
+                    category=row['category'],
+                    count=row['count']
+                )
+            )
+        session.bulk_save_objects(mappings)
+    session.close()
 
-    conn.close()
 
-
-def update_counts_in_table():
+def update_counts_in_table(Session):
     """
-    Подсчитывает количество одинаковых категорий в таблице,
+    Подсчитывает количество разных значений category в таблице,
     для каждой category обновляет count в соответствие с подсчетами
     """
-    conn = connect()
-    categories_count_table = select(conn, 'SELECT category, count(*) AS count FROM csv GROUP BY 1')
-    for row in categories_count_table:
-        query(conn, 'UPDATE csv SET count = %s WHERE category = %s', (row['count'], row['category']))
-    conn.close()
+    session = Session()
+
+    counted_categories_tbl = session.query(Csv.Csv.category, sqla.func.count(Csv.Csv.category)).group_by(
+        Csv.Csv.category).all()
+    for row in counted_categories_tbl:
+        session.query(Csv.Csv).filter(Csv.Csv.category == row[0]).update({'count': row[1]})
+        session.commit()
+
+    session.close()
 
 
 main()
