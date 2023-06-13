@@ -1,20 +1,14 @@
 import os
 import csv
-import sqlalchemy as sqla
-import sqlalchemy.orm
-from models import Csv
-
-DATABASE_URI = f'postgresql+psycopg2://{USERNAME}:{PASSWORD}@{HOST}:{PORT}/{DATABASE}'
+from models.main import Csv, Base
+from db_handler import db, Database
 
 
 def main():
     """Точка входа"""
-    engine = sqla.create_engine(DATABASE_URI)
-    Session = sqla.orm.sessionmaker(bind=engine)
-
     csv_paths = search_csv_files()
-    write_csv_to_table(engine, Session, csv_paths)
-    update_counts_in_table(Session)
+    upload_csv_files(csv_paths, db)
+    update_counts_in_table(db)
 
 
 def search_csv_files() -> list:
@@ -30,7 +24,7 @@ def search_csv_files() -> list:
     return paths
 
 
-def read_csv(path) -> list | None:
+def read_csv(path: str) -> list | None:
     """
     Читает .csv-файл и приводит все значения поля count к типу int
     :param path: путь к csv-файлу
@@ -46,45 +40,29 @@ def read_csv(path) -> list | None:
         return None
 
 
-def create_table(engine):
-    """Создает таблицу в базе данных, если ее нет"""
-    inspect = sqla.inspect(engine)
-    if not inspect.has_table('csv', schema="public"):
-        Csv.Base.metadata.create_all(engine)
+def upload_csv_files(paths: str, db: Database):
+    """
+    Создает в базе данных таблицу, читает все csv-файлы и вставляет их в таблицу
+    :param paths: список путей к csv-файлам
+    :param db: объект класса Database
+    """
+    Base.metadata.create_all(db.engine)
+    with db.Session() as session:
+        for path in paths:
+            rows = read_csv(path)
+            db.insert_csv(session, rows, Csv)
 
 
-def write_csv_to_table(engine, Session, paths):
-    """Создает в базе данных таблицу, поочередно построчно читает csv-файлы и выполняет запись в таблицу"""
-    create_table(engine)
-    session = Session()
-    for path in paths:
-        rows = read_csv(path)
-        mappings = []
-        for row in rows:
-            mappings.append(
-                Csv.Csv(
-                    category=row['category'],
-                    count=row['count']
-                )
-            )
-        session.bulk_save_objects(mappings)
-    session.close()
-
-
-def update_counts_in_table(Session):
+def update_counts_in_table(db: Database):
     """
     Подсчитывает количество разных значений category в таблице,
     для каждой category обновляет count в соответствие с подсчетами
+    :param db: объект класса Database
     """
-    session = Session()
-
-    counted_categories_tbl = session.query(Csv.Csv.category, sqla.func.count(Csv.Csv.category)).group_by(
-        Csv.Csv.category).all()
-    for row in counted_categories_tbl:
-        session.query(Csv.Csv).filter(Csv.Csv.category == row[0]).update({'count': row[1]})
-        session.commit()
-
-    session.close()
+    with db.Session() as session:
+        counted_categories = db.get_counted_categories(session, Csv)
+        for row in counted_categories:
+            db.update_categories_count(session, Csv, row[0], row[1])
 
 
 main()
