@@ -1,5 +1,4 @@
 import random
-import string
 import json
 import os
 import csv
@@ -8,7 +7,7 @@ import shutil
 
 def main():
     """Точка входа"""
-    categories = generate_rand_categories(1000, 8)
+    categories = read_categories('./categories.csv')
     json_file = read_json('./in/config.json')
     if json_file:
         write_out_tables(json_file, categories)
@@ -16,20 +15,17 @@ def main():
         print('Config error!')
 
 
-def generate_rand_categories(arr_len: int, str_len: int) -> list:
+def read_categories(path: str) -> list | None:
     """
-    Генерирует рандомное количество рандомных строк категорий
-    :param arr_len: максимальное количество категорий
-    :param str_len: длина строки категории
-    :return: список строк категорий
+    Читает csv-файл со списком сгенерированных категорий
+    :param path: путь к файлу
+    :return: список словарей или None
     """
-    categories = []
-    for i in range(1, arr_len + 1):
-        categories.append(
-            ''.join(random.choices(string.ascii_letters, k=str_len))
-        )
-
-    return categories
+    try:
+        with open(path, newline='') as csvfile:
+            return list(csv.DictReader(csvfile))
+    except IOError:
+        return None
 
 
 def read_json(path: str) -> list | None:
@@ -115,4 +111,5 @@ def write_out_tables(json_file: list, categories: list):
             )
 
 
-main()
+if __name__ == "__main__":
+    main()
