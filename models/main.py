@@ -7,7 +7,7 @@ Base = declarative_base()
 class Csv(Base):
     __tablename__ = 'csv'
     id = Column(Integer, primary_key=True, autoincrement=True)
-    category = Column(VARCHAR(8))
+    category = Column(VARCHAR())
     count = Column(Integer)
 
     def __init__(self, category, count):

@@ -1,0 +1,30 @@
+version: "3.8"
+
+name: scripts-container
+
+services:
+  db:
+    image: postgres:alpine
+    container_name: db
+    hostname: db
+    restart: on-failure
+    env_file:
+      - .env
+    ports:
+      - ${PORT}:5432
+    environment:
+      POSTGRES_USER: ${USERNAME}
+      POSTGRES_PASSWORD: ${PASSWORD}
+
+  scripts:
+    container_name: scripts
+    build:
+      dockerfile: Dockerfile
+      context: .
+    restart: on-failure
+    env_file:
+      - .env
+    depends_on:
+      - db
+    volumes:
+      - ./in:/app/in

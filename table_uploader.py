@@ -6,10 +6,12 @@ from db_handler import Database
 
 def main():
     """Точка входа"""
+    print('uploading tables started')
     db = Database()
     csv_paths = search_csv_files()
     upload_csv_files(csv_paths, db)
     update_counts_in_table(db)
+    print('uploading tables finished')
 
 
 def search_csv_files() -> list:

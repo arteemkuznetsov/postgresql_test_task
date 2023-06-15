@@ -7,12 +7,14 @@ import shutil
 
 def main():
     """Точка входа"""
+    print('generating tables started')
     categories = read_categories('./categories.csv')
     json_file = read_json('./in/config.json')
     if json_file:
         write_out_tables(json_file, categories)
     else:
         print('Config error!')
+    print('generating tables finished')
 
 
 def read_categories(path: str) -> list | None:
@@ -23,7 +25,7 @@ def read_categories(path: str) -> list | None:
     """
     try:
         with open(path, newline='') as csvfile:
-            return list(csv.DictReader(csvfile))
+            return [x[0] for x in csv.reader(csvfile)]
     except IOError:
         return None
 
